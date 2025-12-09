@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Discord Timestamp Generator — Enhanced</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa4b2; --accent:#7c5cff; --glass: rgba(255,255,255,0.04);
+      --success:#22c55e; --danger:#ff6b6b; --radius:14px; --gap:16px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071023 0%, #081225 60%);color:#e6eef8}
+    .wrap{max-width:980px;margin:36px auto;padding:22px;}
+    header{display:flex;align-items:center;gap:16px}
+    .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(180deg,var(--accent),#4b6bff);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(124,92,255,0.18)}
+    .logo svg{width:40px;height:40px}
+    h1{font-size:20px;margin:0}
+    p.lead{margin:4px 0 0;color:var(--muted);font-size:13px}
+
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:20px;margin-top:22px}
+    @media(max-width:880px){.grid{grid-template-columns:1fr}.wrap{padding:14px}}
+
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:var(--radius);padding:18px;box-shadow:0 6px 20px rgba(2,6,23,0.6);}
+
+    .controls{display:flex;flex-direction:column;gap:12px}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+    .row{display:flex;gap:10px;align-items:center}
+    input[type="date"], input[type="time"], select, .text-input{appearance:none;border:1px solid rgba(255,255,255,0.06);background:var(--glass);padding:10px;border-radius:10px;color:inherit;font-size:14px;width:100%}
+    .styles{display:flex;flex-wrap:wrap;gap:8px}
+    .style-btn{padding:8px 10px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.04);cursor:pointer}
+    .style-btn.active{background:linear-gradient(90deg,var(--accent),#4b6bff);border:none;color:#061026}
+
+    .actions{display:flex;gap:8px;margin-top:6px}
+    button.btn{padding:10px 12px;border-radius:12px;border:none;cursor:pointer;font-weight:600}
+    .btn-primary{background:var(--accent);color:white;box-shadow:0 8px 24px rgba(124,92,255,0.16)}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+
+    .output{word-break:break-all;background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace}
+
+    .preview{margin-top:12px;padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(0,0,0,0.18),transparent);color:var(--muted);min-height:56px;display:flex;flex-direction:column;justify-content:center}
+    .preview .time{font-weight:700;color:#fff}
+
+    .right-column{display:flex;flex-direction:column;gap:12px}
+
+    footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo" aria-hidden>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2v20" stroke="white" stroke-width="1.6" opacity="0.9"/><path d="M5 8c1.5-3 6-3 7 0s5.5 3 7 0" stroke="white" stroke-width="1.6" opacity="0.9"/></svg>
+      </div>
+      <div>
+        <h1>Discord Timestamp Generator made by pinki</h1>
+        <p class="lead">Create Discord timestamp .</p>
+      </div>
+    </header>
+
+    <div class="grid">
+      <main class="card">
+        <div class="controls">
+          <div>
+            <label>Select date</label>
+            <input id="date" type="date">
+          </div>
+          <div>
+            <label>Select time</label>
+            <input id="time" type="time" step="1">
+          </div>
+
+          <div>
+            <label>Time zone</label>
+            <select id="tz">
+              <option value="local">Local time</option>
+              <option value="UTC">UTC</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Display style</label>
+            <div class="styles" id="styles">
+              <button class="style-btn active" data-style="f">f — Full date & time</button>
+              <button class="style-btn" data-style="F">F — Long date</button>
+              <button class="style-btn" data-style="d">d — Short date</button>
+              <button class="style-btn" data-style="D">D — Long date (short)</button>
+              <button class="style-btn" data-style="t">t — Short time</button>
+              <button class="style-btn" data-style="T">T — Long time</button>
+              <button class="style-btn" data-style="R">R — Relative</button>
+            </div>
+          </div>
+
+          <div>
+            <label>Result</label>
+            <div class="output" id="output">&lt;t:...:f&gt;</div>
+            <div class="actions">
+              <button class="btn btn-primary" id="copyBtn">Copy</button>
+              <button class="btn btn-ghost" id="insertNow">Insert now</button>
+            </div>
+          </div>
+
+          <div>
+            <label>Preview</label>
+            <div class="preview" id="preview">Choose date and time .</div>
+          </div>
+        </div>
+      </main>
+
+      <aside class="right-column">
+        <div class="card">
+          <h3 style="margin:0 0 8px 0">Time Shortcuts</h3>
+          <div class="preset-list">
+            <div class="preset" data-type="now">Now — Current Time</div>
+            <div class="preset" data-type="in1h">In 1 Hour</div>
+            <div class="preset" data-type="tomorrow">Tomorrow at 10:00</div>
+            <div class="preset" data-type="nextWeek">Next Week — Same Day</div>
+            <div class="preset" data-type="custom">Custom</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin:0 0 8px 0">Info</h3>
+          <p class="muted" style="margin:0;font-size:14px;line-height:1.45">A Discord timestamp - mafde by pinki <code>&lt;t:UNIX:STYLE&gt;</code>. </p>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="muted">Want additional features or UI changes? Tell me!</footer>
+  </div>
+
+  <script>
+    const el = id => document.getElementById(id);
+    const stylesContainer = document.getElementById('styles');
+
+    function toUnixSeconds(date){ return Math.floor(date.getTime()/1000); }
+    function buildTag(ts, style){ return `<t:${ts}:${style}>`; }
+
+    function updateOutput(){
+      const dateVal = el('date').value;
+      const timeVal = el('time').value;
+      const tz = el('tz').value;
+      const style = document.querySelector('.style-btn.active')?.dataset.style || 'f';
+
+      if(!dateVal || !timeVal){ 
+        el('output').textContent = 'Select date & time';
+        el('preview').textContent = '';
+        return;
+      }
+
+      const [y,m,d] = dateVal.split('-').map(Number);
+      const [hh,mm,ss] = timeVal.split(':').map(x=>Number(x||0));
+
+      let dt = tz === 'UTC'
+        ? new Date(Date.UTC(y, m-1, d, hh, mm, ss))
+        : new Date(y, m-1, d, hh, mm, ss);
+
+      const ts = toUnixSeconds(dt);
+      el('output').textContent = buildTag(ts, style);
+      renderPreview(dt, style);
+    }
+
+    function renderPreview(dateObj, style){
+      if(!dateObj){ el('preview').textContent=''; return }
+      const now = new Date();
+      let text = '';
+
+      if(style === 'R'){
+        const diffSec = Math.round((dateObj - now)/1000);
+        const abs = Math.abs(diffSec);
+        let unit = "seconds", val = diffSec;
+
+        if(abs >= 86400){ unit='days'; val=Math.round(diffSec/86400); }
+        else if(abs >= 3600){ unit='hours'; val=Math.round(diffSec/3600); }
+        else if(abs >= 60){ unit='minutes'; val=Math.round(diffSec/60); }
+
+        text = val===0 ? 'Now'
+             : val>0 ? `In ${Math.abs(val)} ${unit}`
+             : `${Math.abs(val)} ${unit} ago`;
+      } else {
+        try{
+          const dtf = new Intl.DateTimeFormat(undefined, {
+            year:'numeric', month:'long', day:'numeric',
+            hour:'2-digit', minute:'2-digit', second:'2-digit'
+          });
+          text = dtf.format(dateObj);
+        }catch{
+          text = dateObj.toString();
+        }
+      }
+
+      el('preview').innerHTML = `<div class="time">${text}</div><div class="muted" style="margin-top:6px">Timestamp (Unix): ${toUnixSeconds(dateObj)}</div>`;
+    }
+
+    stylesContainer.addEventListener('click', e=>{
+      const btn = e.target.closest('.style-btn');
+      if(!btn) return;
+      document.querySelectorAll('.style-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      updateOutput();
+    });
+
+    ['date','time','tz'].forEach(id=>el(id).addEventListener('input', updateOutput));
+
+    document.querySelectorAll('.preset').forEach(p=>{
+      p.addEventListener('click', ()=>{
+        const t = p.dataset.type;
+        const now = new Date();
+
+        if(t==='now'){
+          el('date').value = now.toISOString().slice(0,10);
+          el('time').value = now.toISOString().slice(11,19);
+        } else if(t==='in1h'){
+          const d = new Date(now.getTime()+3600*1000);
+          el('date').value = d.toISOString().slice(0,10);
+          el('time').value = d.toISOString().slice(11,19);
+        } else if(t==='tomorrow'){
+          const d = new Date(now.getTime()+86400*1000);
+          d.setHours(10,0,0,0);
+          el('date').value = d.toISOString().slice(0,10);
+          el('time').value = d.toISOString().slice(11,19);
+        } else if(t==='nextWeek'){
+          const d = new Date(now.getTime()+7*86400*1000);
+          el('date').value = d.toISOString().slice(0,10);
+          el('time').value = d.toISOString().slice(11,19);
+        }
+        updateOutput();
+      })
+    })
+
+    el('copyBtn').addEventListener('click', async ()=>{
+      const txt = el('output').textContent;
+      try{
+        await navigator.clipboard.writeText(txt);
+        el('copyBtn').textContent = 'Copied!';
+        setTimeout(()=> el('copyBtn').textContent = 'Copy', 1400);
+      }catch{
+        alert('Copy failed — copy manually: ' + txt);
+      }
+    });
+
+    el('insertNow').addEventListener('click', ()=>{
+      const now = new Date();
+      el('date').value = now.toISOString().slice(0,10);
+      el('time').value = now.toISOString().slice(11,19);
+      updateOutput();
+    });
+
+    (function init(){
+      const now = new Date();
+      el('date').value = now.toISOString().slice(0,10);
+      el('time').value = now.toISOString().slice(11,19);
+      updateOutput();
+    })();
+  </script>
+</body>
+</html>
